@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gym Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef0ec;--card:#fff;--ink:#14232b;--mut:#5d6b70;--line:#d8ddd8;--pri:#0f4c5c;--onpri:#fff;--exp:#fde3dc;--expt:#9c2a10;--soon:#fff1cc;--soont:#7a5300;--ok:#e3f1e6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10181b;--card:#182328;--ink:#e8eeee;--mut:#98a8ab;--line:#2b3a40;--pri:#5cc0d6;--onpri:#08262e;--exp:#4a2119;--expt:#ffb4a0;--soon:#46380f;--soont:#ffd98a;--ok:#1d3326}}
+:root[data-theme="dark"]{--bg:#10181b;--card:#182328;--ink:#e8eeee;--mut:#98a8ab;--line:#2b3a40;--pri:#5cc0d6;--onpri:#08262e;--exp:#4a2119;--expt:#ffb4a0;--soon:#46380f;--soont:#ffd98a;--ok:#1d3326}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Barlow,system-ui,sans-serif}
+h1,h2,h3{font-family:'Barlow Condensed',Impact,sans-serif;letter-spacing:.02em;margin:0}
+button,input,select{font:inherit;color:inherit}
+.btn{background:var(--pri);color:var(--onpri);border:0;border-radius:6px;padding:8px 14px;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:4px 10px;font-size:13px}.btn.del{background:transparent;color:var(--expt);border:1px solid var(--expt)}
+:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+input,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--card)}
+label{display:block;font-size:13px;color:var(--mut);margin:10px 0 3px}
+#login{min-height:100vh;display:grid;place-items:center;padding:16px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:28px;width:100%;max-width:360px}
+.box h1{font-size:34px;color:var(--pri)}.err{color:var(--expt);min-height:20px;margin:8px 0 0}
+#app{display:none;max-width:1100px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+header h1{font-size:32px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--pri);padding:10px 14px}
+.stat b{font:700 30px 'Barlow Condensed',sans-serif;display:block;line-height:1.1}.stat span{color:var(--mut);font-size:13px}
+.stat.e{border-left-color:var(--expt)}.stat.s{border-left-color:var(--soont)}
+.bar{display:flex;gap:8px;margin-bottom:10px}.bar input{max-width:320px}
+.wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:8px}
+table{width:100%;border-collapse:collapse;min-width:720px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:600;color:var(--mut);font-size:13px}
+tr.exp td{background:var(--exp);color:var(--expt)}tr.soon td{background:var(--soon);color:var(--soont)}
+.tag{font-size:12px;font-weight:600;margin-left:6px}
+.acts{display:flex;gap:6px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;padding:16px;z-index:5;overflow:auto}
+.modal.on{display:grid}.modal .box{max-width:440px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.inv{max-width:480px}.inv hr{border:0;border-top:1px dashed var(--line);margin:12px 0}
+.inv table{min-width:0}.inv td{border:0;padding:3px 0;white-space:normal}.inv td:last-child{text-align:right}
+@media(max-width:700px){#app{padding:10px}header h1{font-size:24px}.bar{flex-wrap:wrap}.bar input{max-width:none;flex:1 1 100%}.bar .btn{flex:1}input,select{font-size:16px}.btn.sm{padding:8px 12px}.modal{place-items:start center}.wrap{background:none;border:0;overflow:visible}.wrap table,.wrap tbody,.wrap tr,.wrap td{display:block;min-width:0}.wrap thead{display:none}.wrap tr{background:var(--card);border:1px solid var(--line);border-radius:8px;margin-bottom:10px;overflow:hidden}.wrap td{display:flex;gap:12px;align-items:center;white-space:normal;padding:8px 12px}.wrap td::before{content:attr(data-l);color:var(--mut);font-size:13px;width:100px;flex:none}.wrap td.acts::before{display:none}.wrap td .tag{margin-left:0}}
+@media print{body *{visibility:hidden}#invbox,#invbox *{visibility:visible}#invbox{position:absolute;left:0;top:0;width:100%;border:0}.noprint{display:none!important}}
+</style></head><body>
+
+<div id="login"><form class="box" id="lf" novalidate>
+<h1 id="lname">Gym Dashboard</h1><p style="color:var(--mut);margin:4px 0 8px">Only the admin or gym owner can sign in.</p>
+<label for="u">Username</label><input id="u" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+<label for="p">Password</label><input id="p" type="password" autocomplete="current-password" autocapitalize="none">
+<p class="err" id="err"></p><button class="btn" style="width:100%;margin-top:6px">Sign in</button>
+</form></div>
+
+<div id="app">
+<header><h1 id="gname">Gym Dashboard</h1><div><span id="who" style="color:var(--mut);margin-right:10px"></span><button class="btn ghost sm" id="cp">Change password</button> <button class="btn ghost sm" id="out">Sign out</button></div></header>
+<div class="stats"><div class="stat"><b id="s1">0</b><span>Total members</span></div><div class="stat"><b id="s2">0</b><span>Active</span></div><div class="stat s"><b id="s3">0</b><span>Expiring in 7 days</span></div><div class="stat e"><b id="s4">0</b><span>Expired</span></div><div class="stat e"><b id="s5">₹0</b><span>Pending dues</span></div></div>
+<div class="bar"><input id="q" placeholder="Search by name or Member ID" aria-label="Search"><button class="btn" id="add">+ New member</button><button class="btn ghost" id="exp">Export to Excel</button></div>
+<div class="wrap"><table><thead><tr><th>Member ID</th><th>Name</th><th>Joining date</th><th>Expire date</th><th>Payment</th><th>Pending</th><th>Invoice</th><th>Actions</th></tr></thead><tbody id="tb"></tbody></table></div>
+</div>
+
+<div class="modal" id="mm"><form class="box" id="mf" novalidate>
+<h2 id="mt" style="font-size:26px">New member</h2>
+<label for="fn">Name</label><input id="fn" required>
+<label for="fp">Mobile number</label><input id="fp" inputmode="tel">
+<div class="row2"><div><label for="fpl">Plan</label><select id="fpl"><option value="1">1 month</option><option value="3">3 months</option><option value="6">6 months</option><option value="12">12 months</option></select></div>
+<div><label for="fa">Total fee (₹)</label><input id="fa" type="number" min="0" required></div></div>
+<label for="fpd">Amount paid (₹)</label><input id="fpd" type="number" min="0" required>
+<div class="row2"><div><label for="fj">Joining date</label><input id="fj" type="date" required></div>
+<div><label for="fe">Expire date</label><input id="fe" type="date" required></div></div>
+<label for="fpm">Payment mode</label><select id="fpm"><option>Cash</option><option>UPI</option></select>
+<p class="err" id="ferr"></p><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px"><button type="button" class="btn ghost" id="mc">Cancel</button><button class="btn">Save member</button></div>
+</form></div>
+
+<div class="modal" id="pm"><form class="box" id="pf" novalidate><h2 style="font-size:26px">Change password</h2><label for="p0">Current password</label><input id="p0" type="password" autocomplete="current-password" autocapitalize="none"><label for="p1">New password (min 6 characters)</label><input id="p1" type="password" autocomplete="new-password" autocapitalize="none"><label for="p2">Confirm new password</label><input id="p2" type="password" autocomplete="new-password" autocapitalize="none"><p class="err" id="perr"></p><div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn ghost" id="pc">Cancel</button><button class="btn">Save password</button></div></form></div>
+<div class="modal" id="im"><div class="box inv" id="invbox"><div id="invc"></div>
+<p class="err noprint" id="ierr"></p><div class="noprint" style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px"><button class="btn ghost" id="ic">Close</button><button class="btn" id="ip">Download invoice</button></div></div></div>
+
+<script>
+var GYM="Rockstar Fitness Center";
+var USERS={admin:"admin123",owner:"owner123"}; // change passwords here
+var KEY="gym_members_v1",members=[],editId=null;
+var $=function(i){return document.getElementById(i)};
+function load(){try{members=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){members=[]}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(members))}catch(e){}}
+function sess(v){try{if(v===undefined)return sessionStorage.getItem("gym_user");if(v)sessionStorage.setItem("gym_user",v);else sessionStorage.removeItem("gym_user")}catch(e){}return null}
+function iso(d){return d.toISOString().slice(0,10)}
+function addM(s,n){var d=new Date(s);d.setMonth(d.getMonth()+n);return iso(d)}
+function fmt(s){var d=new Date(s);return d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})}
+function days(s){var t=new Date(iso(new Date()));return Math.round((new Date(s)-t)/864e5)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function show(u){$("login").style.display=u?"none":"grid";$("app").style.display=u?"block":"none";if(u){$("who").textContent=u;load();render()}}
+async function sha(s){var b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [].map.call(new Uint8Array(b),function(x){return("0"+x.toString(16)).slice(-2)}).join("")}
+function getPw(){try{return JSON.parse(localStorage.getItem("gym_pw_v1")||"{}")}catch(e){return{}}}
+async function check(u,p){var h=getPw()[u];if(h){try{return await sha(u+":"+p)===h}catch(e){return false}}return !!USERS[u]&&USERS[u]===p}
+$("lf").onsubmit=async function(e){e.preventDefault();var u=$("u").value.trim().toLowerCase(),p=$("p").value.trim(),ok=false;
+ try{ok=await check(u,p)}catch(x){}
+ if(ok){sess(u);$("err").textContent="";$("p").value="";try{show(u)}catch(x){$("err").textContent="Signed in, but the dashboard failed to load: "+x.message}}else $("err").textContent="Incorrect username or password."};
+$("out").onclick=function(){sess(false);show(null)};
+$("cp").onclick=function(){$("p0").value=$("p1").value=$("p2").value="";$("perr").textContent="";$("pm").classList.add("on")};
+$("pc").onclick=function(){$("pm").classList.remove("on")};
+$("pf").onsubmit=async function(e){e.preventDefault();var u=sess(),a=$("p0").value.trim(),b=$("p1").value.trim(),c=$("p2").value.trim(),m="";
+ try{if(!(await check(u,a)))m="Current password is incorrect.";else if(b.length<6)m="New password must be at least 6 characters.";else if(b!==c)m="New passwords do not match.";else{var pw=getPw();pw[u]=await sha(u+":"+b);localStorage.setItem("gym_pw_v1",JSON.stringify(pw))}}catch(x){m="Could not change the password on this device."}
+ $("perr").textContent=m;if(!m){$("pm").classList.remove("on");$("who").textContent=u+" (password changed)"}};
+function render(){
+ var q=$("q").value.toLowerCase(),a=0,s=0,x=0,pd=0,h="";
+ members.forEach(function(m){var d=days(m.exp);pd+=pend(m);if(d<0)x++;else if(d<=7)s++;else a++});
+ $("s1").textContent=members.length;$("s2").textContent=a+s;$("s3").textContent=s;$("s4").textContent=x;$("s5").textContent="₹"+pd.toLocaleString("en-IN");
+ members.filter(function(m){return !q||m.name.toLowerCase().indexOf(q)>-1||m.id.toLowerCase().indexOf(q)>-1}).forEach(function(m){
+  var d=days(m.exp),c=d<0?"exp":d<=7?"soon":"",t=d<0?"Expired":d<=7?(d===0?"Expires today":d+" days left"):"";
+  h+='<tr class="'+c+'"><td>'+esc(m.id)+'</td><td>'+esc(m.name)+'</td><td>'+fmt(m.join)+'</td><td>'+fmt(m.exp)+(t?'<span class="tag">'+t+'</span>':'')+'</td><td>'+esc(m.pay)+'</td><td>'+(pend(m)>0?'<b style="color:var(--expt)">₹'+pend(m).toLocaleString("en-IN")+'</b>':'—')+'</td><td><button class="btn sm" data-a="inv" data-i="'+m.id+'">Invoice</button></td><td class="acts"><button class="btn ghost sm" data-a="edit" data-i="'+m.id+'">Edit</button><button class="btn del sm" data-a="del" data-i="'+m.id+'">Delete</button></td></tr>'});
+ $("tb").innerHTML=h||'<tr><td colspan="8" style="text-align:center;color:var(--mut);padding:28px">No members yet. Click "+ New member" to add your first one.</td></tr>'}
+$("q").oninput=render;
+var hd=[].map.call(document.querySelectorAll("thead th"),function(t){return t.textContent});
+new MutationObserver(function(){[].forEach.call($("tb").rows,function(r){if(r.cells.length>1)[].forEach.call(r.cells,function(c,i){c.setAttribute("data-l",hd[i])})})}).observe($("tb"),{childList:true});
+function pend(m){return Math.max(0,m.amt-(m.paid==null?m.amt:m.paid))}
+function find(i){return members.filter(function(m){return m.id===i})[0]}
+$("tb").onclick=function(e){var b=e.target.closest("button");if(!b)return;var m=find(b.dataset.i),a=b.dataset.a;
+ if(a==="edit")openForm(m);else if(a==="inv")invoice(m);
+ else if(a==="del"){if(b.dataset.arm){members=members.filter(function(z){return z!==m});save();render()}else{b.dataset.arm=1;b.textContent="Sure?";setTimeout(function(){delete b.dataset.arm;b.textContent="Delete"},3000)}}};
+function openForm(m){editId=m?m.id:null;$("mt").textContent=m?"Update member":"New member";$("ferr").textContent="";pt=!!m;
+ $("fn").value=m?m.name:"";$("fp").value=m?m.phone:"";$("fpl").value=m?m.plan:"1";$("fa").value=m?m.amt:"";$("fpd").value=m?(m.paid==null?m.amt:m.paid):"";
+ $("fj").value=m?m.join:iso(new Date());$("fe").value=m?m.exp:addM(iso(new Date()),1);$("fpm").value=m?m.pay:"Cash";$("mm").classList.add("on");$("fn").focus()}
+$("add").onclick=function(){openForm(null)};
+async function saveFile(name,data,type){var d=null;try{d=await claude.use("downloads")}catch(e){}
+ if(d){await d.save({filename:name,data:data});return}
+ var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:type}));a.download=name;document.body.appendChild(a);a.click();a.remove()}
+$("exp").onclick=async function(){
+ var rows=[["Member ID","Name","Mobile","Plan (months)","Joining date","Expire date","Total fee","Amount paid","Pending","Payment mode","Status"]];
+ members.forEach(function(m){var d=days(m.exp);rows.push([m.id,m.name,m.phone||"",m.plan,m.join,m.exp,m.amt,m.amt-pend(m),pend(m),m.pay,d<0?"Expired":"Active"])});
+ var csv="\uFEFF"+rows.map(function(r){return r.map(function(v){v=String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(",")}).join("\r\n");
+ try{await saveFile("members-backup-"+iso(new Date())+".csv",csv,"text/csv")}catch(e){}};
+$("mc").onclick=function(){$("mm").classList.remove("on")};
+function recalc(){if($("fj").value)$("fe").value=addM($("fj").value,+$("fpl").value)}
+$("fpl").onchange=recalc;$("fj").onchange=recalc;
+var pt=false;$("fpd").oninput=function(){pt=true};$("fa").oninput=function(){if(!pt)$("fpd").value=$("fa").value};
+$("mf").onsubmit=function(e){e.preventDefault();
+ var o={name:$("fn").value.trim(),phone:$("fp").value.trim(),plan:$("fpl").value,amt:+$("fa").value,paid:$("fpd").value===""?+$("fa").value:+$("fpd").value,join:$("fj").value,exp:$("fe").value,pay:$("fpm").value};
+ var er=!o.name?"Enter the member's name.":!$("fa").value?"Enter the total fee.":!o.join||!o.exp?"Select joining and expire dates.":o.exp<o.join?"Expire date must be after the joining date.":o.paid>o.amt?"Amount paid cannot be more than the total fee.":"";$("ferr").textContent=er;if(er)return;
+ 
+ if(editId){Object.assign(find(editId),o)}
+ else{var n=members.reduce(function(r,m){return Math.max(r,parseInt(m.id.slice(4))||0)},0)+1;o.id="GYM-"+("00"+n).slice(-3);members.push(o)}
+ save();render();$("mm").classList.remove("on")};
+function invoice(m){var no="INV-"+m.id.slice(4)+"-"+m.join.replace(/-/g,"");
+ $("invc").innerHTML='<h2 style="font-size:30px;color:var(--pri)">'+esc(GYM)+'</h2><div style="color:var(--mut)">Membership invoice</div><hr>'
+ +'<table><tr><td>Invoice no.</td><td>'+no+'</td></tr><tr><td>Date</td><td>'+fmt(m.join)+'</td></tr><tr><td>Member</td><td>'+esc(m.name)+' ('+esc(m.id)+')</td></tr>'+(m.phone?'<tr><td>Mobile</td><td>'+esc(m.phone)+'</td></tr>':'')
+ +'<tr><td>Plan</td><td>'+m.plan+' month(s)</td></tr><tr><td>Valid</td><td>'+fmt(m.join)+' to '+fmt(m.exp)+'</td></tr><tr><td>Payment</td><td>'+esc(m.pay)+'</td></tr></table><hr>'
+ +'<table><tr><td>Total fee</td><td>₹'+m.amt.toLocaleString("en-IN")+'</td></tr><tr><td style="font-size:18px"><b>Amount paid</b></td><td style="font:700 28px \'Barlow Condensed\',sans-serif">₹'+(m.amt-pend(m)).toLocaleString("en-IN")+'</td></tr><tr><td>Pending</td><td>₹'+pend(m).toLocaleString("en-IN")+'</td></tr></table><hr><div style="color:var(--mut);text-align:center">Thank you! Keep training.</div>';
+ curM=m;$("ierr").textContent="";$("im").classList.add("on")}
+$("ic").onclick=function(){$("im").classList.remove("on")};
+var curM=null;
+$("ip").onclick=async function(){
+ var m=curM,d=null;try{d=await claude.use("downloads")}catch(e){}
+ if(!m)return;
+ var h='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Invoice '+esc(m.id)+'</title><style>:root{--pri:#0f4c5c;--mut:#5d6b70}body{font:15px/1.5 system-ui,sans-serif;max-width:480px;margin:24px auto;padding:0 16px;color:#14232b}h2{margin:0}hr{border:0;border-top:1px dashed #bbb;margin:12px 0}table{width:100%;border-collapse:collapse}td{padding:3px 0}td:last-child{text-align:right}button{padding:8px 14px;margin-top:16px}@media print{button{display:none}}</style></head><body>'+$("invc").innerHTML+'<button onclick="window.print()">Print</button></body></html>';
+ try{if(d)await d.save({filename:"invoice-"+m.id+".html",data:h});else{var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([h],{type:"text/html"}));a.download="invoice-"+m.id+".html";document.body.appendChild(a);a.click();a.remove()}$("ierr").textContent=""}catch(e){if(!e||e.code!=="declined")$("ierr").textContent="Could not save the invoice."}};
+$("gname").textContent=GYM+" Dashboard";$("lname").textContent=GYM;document.title=GYM+" Dashboard";
+show(sess());
+</script></body></html>
